@@ -1,3 +1,4 @@
+# SI 364 - Miguel Martinez
 import os
 from flask import Flask, render_template, session, redirect, url_for, flash, request
 from flask_script import Manager, Shell
@@ -143,21 +144,31 @@ def one_list(ident):
 # HINT: These template updates are minimal, but that small update(s) make(s) a big change in what you can do in the app! Check out the examples from previous classes for help.
 
 
-# TODO 364: Complete route to update an individual ToDo item's priority
+# DONE: Complete route to update an individual ToDo item's priority
 @app.route('/update/<item>',methods=["GET","POST"])
 def update(item):
-    pass
+    form = UpdatePriorityForm()
+    if form.validate_on_submit():
+        items = TodoItem.query.filter_by(description=item).first()
+        items.priority = form.updatePriority.data
+        db.session.commit()
+        flash("Updated priority of {}".format(item))
+        return redirect(url_for("all_lists"))
+    return render_template("update_item.html",item=item,form=form)
     # This code should use the form you created above for updating the specific item and manage the process of updating the item's priority.
     # Once it is updated, it should redirect to the page showing all the links to todo lists.
     # It should flash a message: Updated priority of <the description of that item>
     # HINT: What previous class example is extremely similar?
 
-# TODO 364: Fill in the update_item.html template to work properly with this update route. (HINT: Compare against example!)
+# DONE: Fill in the update_item.html template to work properly with this update route. (HINT: Compare against example!)
 
-# TODO 364: Complete route to delete a whole ToDoList
+# DONE: Complete route to delete a whole ToDoList
 @app.route('/delete/<lst>',methods=["GET","POST"])
 def delete(lst):
-    pass # Replace with code
+    db.session.delete(TodoList.query.filter_by(title=lst).first())
+    flash("Deleted list {}".format(lst))
+    return redirect(url_for("all_lists"))
+
     # This code should successfully delete the appropriate todolist
     # Should flash a message about what was deleted, e.g. Deleted list <title of list>
     # And should redirect the user to the page showing all the todo lists
